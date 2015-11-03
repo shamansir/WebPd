@@ -50,7 +50,10 @@
                      inletAcceptsMultipleLinks: true });
 
         var importedPatch = Rpd.import.pd(mainStr);
-        if (importedPatch) importedPatch.addNode('pd/edit-switch');
+        if (importedPatch) {
+            //importedPatch.addNode('pd/edit-switch');
+            importedPatch.addNode('pd/toolbar').move(40, 100);
+        }
 
         // Show start button
         $('#loading').fadeOut(200, function() { $('#startButton').fadeIn() })
