@@ -40,7 +40,7 @@
       var patch
       $.get('pd/main.pd', function(mainStr) {
         // Loading the patch
-        patch = Pd.loadPatch(mainStr)
+        patch = Pd.loadPatch(mainStr);
 
         // Rendering the patch as SVG
         //$('#svg').html(pdfu.renderSvg(pdfu.parse(mainStr), {svgFile: false, ratio: 1.5}))
