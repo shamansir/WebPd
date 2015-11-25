@@ -190,7 +190,7 @@ var Pd = module.exports = {
       })
     }
 
-    if (patch) patch.patchData = patchData
+    patch.patchData = patchData
   },
 
   core: {
