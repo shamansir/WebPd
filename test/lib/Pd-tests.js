@@ -172,6 +172,18 @@ describe('Pd', function() {
       assert.ok(dac.i(0).connections[0] === osc.o(0))
     })
 
+    it('should skip unknown objects without throwing an error', function() {
+      var patchStr = fs.readFileSync(__dirname + '/patches/simple-with-unknown-objects.pd').toString()
+        , patch = Pd.loadPatch(patchStr)
+      assert.equal(patch.objects.length, 1)
+
+      var osc = patch.objects[0]
+
+      // Check objects
+      assert.equal(osc.type, 'osc~')
+      assert.equal(osc.frequency, 440)
+    })
+
     it('should load a patch with a subpatch properly', function() {
       var patchStr = fs.readFileSync(__dirname + '/patches/subpatch.pd').toString()
         , patch = Pd.loadPatch(patchStr)

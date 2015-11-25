@@ -151,30 +151,44 @@ var Pd = module.exports = {
   // TODO: handling graph better? But ... what is graph :?
   _preparePatch: function(patch, patchData) {
     var createdObjs = {}
+      , errors = []
 
     // Creating nodes
     patchData.nodes.forEach(function(nodeData) {
       var proto = nodeData.proto
         , obj
-      if (proto === 'graph') {
-        var arrayNodeData = nodeData.subpatch.nodes[0]
-        obj = patch._createObject('array', arrayNodeData.args || [])
-        obj.setData(new Float32Array(arrayNodeData.data), true)
-        proto = 'array'
-      } else {
-        obj = patch._createObject(proto, nodeData.args || [])
+      try {
+        if (proto === 'graph') {
+          var arrayNodeData = nodeData.subpatch.nodes[0]
+          obj = patch._createObject('array', arrayNodeData.args || [])
+          obj.setData(new Float32Array(arrayNodeData.data), true)
+          proto = 'array'
+        } else {
+          obj = patch._createObject(proto, nodeData.args || [])
+        }
+        if (proto === 'pd') Pd._preparePatch(obj, nodeData.subpatch)
+        createdObjs[nodeData.id] = obj
+      } catch(e) {
+        errors.push(e)
       }
-      if (proto === 'pd') Pd._preparePatch(obj, nodeData.subpatch)
-      createdObjs[nodeData.id] = obj
     })
 
     // Creating connections
     patchData.connections.forEach(function(conn) {
       var sourceObj = createdObjs[conn.source.id]
         , sinkObj = createdObjs[conn.sink.id]
-      if (!sourceObj || !sinkObj) throw new Error('invalid connection')
-      sourceObj.o(conn.source.port).connect(sinkObj.i(conn.sink.port))
+      if (sourceObj && sinkObj) {
+        sourceObj.o(conn.source.port).connect(sinkObj.i(conn.sink.port))
+      } else {
+        errors.push(new Error('invalid connection'))
+      }
     })
+
+    if (errors.length) {
+      errors.forEach(function(error) {
+        console.error(error)
+      })
+    }
 
     if (patch) patch.patchData = patchData
   },
