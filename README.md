@@ -117,16 +117,23 @@ Python comes bundled with such a web server. Open a terminal, navigate to the fo
 
 Alternatively, if you prefer node, you may want to install the handy [`http-server`](https://github.com/indexzero/http-server#readme) command-line utility.
 
-### Other patches have worked before but this one doesn't
+### One of my patches doesn't work in WebPd
 
 WebPd has a few [limitations](#list-of-implemented-objects-and-other-limitations). For example, some of the Pd objects are not available. Open your browser's developer console (`ctrl+shift+i` on firefox and chrome for linux or windows), and you should get a clear error message telling you what is wrong. If the error is unclear, or if there is no error, it might be a bug with WebPd. In that case, it would be great if you could [submit a bug report](#submitting-a-bug-report).
+
+Here is a non-exhaustive list of other limitations and inconsistencies with Pure Data :
+
+- commas in messages are not implemented yet
+- Pd system messages, such as the widely used `[;pd dsp 1(` , are not implemented
+- `[phasor~]` is not a real, perfect, phasor. You shouldn't use it to read from an array for example.
+- `[phasor~]` inlet 2 (used to set the phase) is not implemented
 
 
 ### A patch that works fine on the desktop doesn't seem to work on mobile
 
 WebPd uses Web Audio API, and as it happens, running Web Audio API on mobile is not always easy. First, make sure that you use a browser **that does support Web Audio API**. For example the default Android browser does not, and so on Android you have to use Chrome or Firefox. 
 
-On iPhone and iPad, things are even trickier. For security reasons, audio is blocked by iOS, unless you start it in direct answer to a user action (click, touch, ...). So to get sound with WebPd, you will need to do exactly that and for example call `Pd.start` in a button's `onclick` handler : `onclick="Pd.start()"`.
+On iPhone and iPad, things are even trickier. For security reasons, audio is blocked by iOS, unless you start it in direct answer to a user action (click, touch, ...). So to get sound with WebPd, you will need to do exactly that and for example call `Pd.start` in a button's `ontouchend` handler : `ontouchend="Pd.start()"`. You can copy the [code to launch WebPd's examples](https://github.com/sebpiq/WebPd/blob/master/examples/assets/examples.js) to get around this, and work in all browsers.
 
 
 List of implemented objects and other limitations
@@ -192,7 +199,7 @@ WebPd comes with two test suites.
 
 ### Automated tests
 
-The tests in `test/src` run on **node.js** using [mocha](http://mochajs.org/). To run them, simply execute the command `npm test`.
+The tests in `test/lib` run on **node.js** using [mocha](http://mochajs.org/). To run them, simply execute the command `npm test`.
 
 
 ### Browser tests

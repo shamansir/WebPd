@@ -1,3 +1,10 @@
+0.4.0
+======
+
+- public API to create externals
+- bug fixes
+
+
 0.3.2
 -------
 

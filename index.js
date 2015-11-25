@@ -19,23 +19,20 @@
  */
 
 var _ = require('underscore')
-  , pdfu = require('pd-fileutils')
+  , pdfu = require('pd-fileutils.parser')
   , Patch = require('./lib/core/Patch')
   , PdObject = require('./lib/core/PdObject')
-  , utils = require('./lib/core/utils')
-  , portlets = require('./lib/objects/portlets')
-  , waa = require('./lib/waa')
+  , mixins = require('./lib/core/mixins')
+  , portlets = require('./lib/waa/portlets')
+  , waa = require('./lib/waa/interfaces')
   , pdGlob = require('./lib/global')
   , interfaces = require('./lib/core/interfaces')
-  , patchIds = _.extend({}, utils.UniqueIdsMixin)
+  , patchIds = _.extend({}, mixins.UniqueIdsMixin)
 
 // Various initializations
-require('./lib/objects').declareObjects(pdGlob.library)
+require('./lib/index').declareObjects(pdGlob.library)
 
 var Pd = module.exports = {
-
-  // Returns the current sample rate
-  getSampleRate: function() { return pdGlob.settings.sampleRate },
 
   // Start dsp
   start: function(opts) {
@@ -84,6 +81,9 @@ var Pd = module.exports = {
   // Returns true if the dsp is started, false otherwise
   isStarted: function() { return pdGlob.isStarted },
 
+  // Returns the audio engine
+  getAudio: function() { return pdGlob.audio },
+
   // Send a message to a named receiver inside the graph
   send: function(name, args) {
     pdGlob.emitter.emit('msg:' + name, args)
@@ -100,10 +100,16 @@ var Pd = module.exports = {
     if (_.isString(patchData)) patchData = pdfu.parse(patchData)
     var CustomObject = function(patch, id, args) {
       var patch = new Patch(patch, id, args)
+      patch.patchId = patchIds._generateId()
       Pd._preparePatch(patch, patchData)
       return patch
     }
     CustomObject.prototype = Patch.prototype
+    this.registerExternal(name, CustomObject)
+  },
+
+  // Register a custom object as `name`. `CustomObject` is a subclass of `core.PdObject`.
+  registerExternal: function(name, CustomObject) {
     pdGlob.library[name] = CustomObject
   },
 
@@ -122,8 +128,6 @@ var Pd = module.exports = {
   },
 
   // Loads a patch from a string (Pd file), or from an object (pd.json)
-  // TODO : problems of scheduling on load, for example executing [loadbang] ???
-  //         should we use the `futureTime` hack? 
   loadPatch: function(patchData) {
     var patch = this._createPatch()
     if (_.isString(patchData)) patchData = pdfu.parse(patchData)
